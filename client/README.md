@@ -70,6 +70,7 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/tr
 
 ### `Dependencies installed`
 react-router
+react-router-dom
 socket.io-client
 react-scroll-to-bottom
 react-emoji 
