@@ -1,15 +1,17 @@
 const express = require('express');
 const sockectio = require('socket.io');
 const http = require('http');
+const cors = require('cors');
 
 const PORT = process.env.PORT || 5000;
 const router = require('./routes');
+const { addUser, removeUser, getUser, getUserInRoom } = require('./user/users');
 
 const app = express();
 const server = http.createServer(app);
 const io = sockectio(server);
 
-const { addUser, removeUser, getUser, getUserInRoom } = require('./user/users');
+app.use(cors());
 
 io.on('connection', socket => {
   console.log('We have a new connection!!!');
