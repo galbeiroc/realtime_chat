@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import InfoBar from '../InfoBar';
 import Input from '../Input';
-import Messages from '../Messages'
+import Messages from '../Messages';
 import queryString from 'query-string';
 import io from 'socket.io-client';
 import { ENDPOINT } from '../../config/config';
@@ -22,7 +22,11 @@ const Chat = ({ location }) => {
 
     setName(name);
     setRoom(room);
-    socket.emit('join', { name, room });
+    socket.emit('join', { name, room }, error => {
+      if (error) {
+        alert(error);
+      }
+    });
 
     return () => {
       socket.emit('disconnect');
@@ -51,7 +55,7 @@ const Chat = ({ location }) => {
     <div className="outerContainer">
       <div className="container">
         <InfoBar room={room} />
-        <Messages messages={messages} name={name}/>
+        <Messages messages={messages} name={name} />
         <Input
           message={message}
           setMessage={setMessage}
