@@ -1,15 +1,17 @@
 const express = require('express');
 const sockectio = require('socket.io');
 const http = require('http');
+const cors = require('cors');
 
 const PORT = process.env.PORT || 5000;
 const router = require('./routes');
+const { addUser, removeUser, getUser, getUserInRoom } = require('./user/users');
 
 const app = express();
 const server = http.createServer(app);
 const io = sockectio(server);
 
-const { addUser, removeUser, getUser, getUserInRoom } = require('./user/users');
+app.use(cors());
 
 io.on('connection', socket => {
   console.log('We have a new connection!!!');
@@ -17,6 +19,8 @@ io.on('connection', socket => {
     const { error, user } = addUser({ id: socket.id, name, room });
 
     if (error) return callback(error);
+
+    socket.join(user.room);
 
     socket.emit('message', {
       user: 'admin',
@@ -26,7 +30,11 @@ io.on('connection', socket => {
       .to(user.room)
       .emit('message', { user: 'admin', text: `${user.name} has Joined!` });
 
-    socket.join(user.room);
+    io.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUserInRoom(user.room)
+    });
+
     callback();
   });
 
@@ -34,12 +42,24 @@ io.on('connection', socket => {
     const user = getUser(socket.id);
 
     io.to(user.room).emit('message', { user: user.name, text: message });
+    io.to(user.room).emit('roomData', {
+      room: user.room,
+      users: getUserInRoom(user.room)
+    });
 
     callback();
   });
 
   socket.on('disconnect', () => {
-    console.log('User had left');
+    const user = removeUser(socket.id);
+    console.log('user', user);
+
+    if (user) {
+      io.to(user.room).emit('message', {
+        user: 'admin',
+        text: `${user.name} has left..!`
+      });
+    }
   });
 });
 
