@@ -32,7 +32,7 @@ const Chat = ({ location }) => {
       socket.emit('disconnect');
       socket.off();
     };
-  }, [ENDPOINT, location.search]);
+  }, [location.search]);
 
   //handle message
   useEffect(() => {
